@@ -17,9 +17,9 @@ if (process.env.NODE_ENV != 'container') {
 
 const appInsights = require('applicationinsights');
 
-appInsights
-  .setup()
-  .setAutoDependencyCorrelation(true)
+appInsights.setup()
+appInsights.defaultClient.context.tags[appInsights.defaultClient.context.keys.cloudRole] = "data-api";
+appInsights.setAutoDependencyCorrelation(true)
   .setAutoCollectRequests(true)
   .setAutoCollectPerformance(true)
   .setAutoCollectExceptions(true)
