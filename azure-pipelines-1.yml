@@ -37,3 +37,15 @@ stages:
         containerRegistry: $(dockerRegistryServiceConnection)
         tags: |
           $(tag)
+    - task: HelmDeploy@0
+      inputs:
+        connectionType: 'Kubernetes Service Connection'
+        kubernetesServiceConnection: 'Cloud-Lab-Workshop-kh-workshop-cluster-hackfest-1580478179331'
+        namespace: 'hackfest'
+        command: 'upgrade'
+        chartType: 'FilePath'
+        chartPath: '$(Build.SourcesDirectory)/charts/data-api'
+        releaseName: 'data-api'
+        overrideValues: 'deploy.acrServer=$(containerRegistry),deploy.imageTag=$(tag)'
+        valueFile: '$(Build.SourcesDirectory)/charts/data-api/values.yaml'
+
