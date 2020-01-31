@@ -18,15 +18,16 @@ if (process.env.NODE_ENV != 'container') {
 const appInsights = require('applicationinsights');
 
 appInsights.setup()
-appInsights.defaultClient.context.tags[appInsights.defaultClient.context.keys.cloudRole] = "data-api";
-appInsights.setAutoDependencyCorrelation(true)
+  .setAutoDependencyCorrelation(true)
   .setAutoCollectRequests(true)
   .setAutoCollectPerformance(true)
   .setAutoCollectExceptions(true)
   .setAutoCollectDependencies(true)
   .setAutoCollectConsole(true)
   .setUseDiskRetryCaching(true)
-  .start();
+
+appInsights.defaultClient.context.tags[appInsights.defaultClient.context.keys.cloudRole] = "data-api";
+appInsights.start();
 
 mongoose.set('useCreateIndex', true);
 mongoose.set('useFindAndModify', false);
