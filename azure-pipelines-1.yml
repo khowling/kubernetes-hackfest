@@ -39,8 +39,8 @@ stages:
           $(tag)
     - task: HelmDeploy@0
       inputs:
-        connectionType: 'Kubernetes Service Connection'
-        kubernetesServiceConnection: 'Cloud-Lab-Workshop-kh-workshop-cluster-hackfest-1580478179331'
+        connectionType: Kubernetes Service Connection
+        kubernetesServiceEndpoint: Cloud-Lab-Workshop-kh-workshop-cluster-hackfest-1580478179331
         namespace: 'hackfest'
         command: 'upgrade'
         chartType: 'FilePath'
