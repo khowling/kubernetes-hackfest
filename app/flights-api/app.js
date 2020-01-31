@@ -15,8 +15,7 @@ if (process.env.NODE_ENV != 'container') {
 }
 
 const appInsights = require('applicationinsights');
-appInsights
-  .setup()
+appInsights.setup()
   .setAutoDependencyCorrelation(true)
   .setAutoCollectRequests(true)
   .setAutoCollectPerformance(true)
@@ -24,7 +23,9 @@ appInsights
   .setAutoCollectDependencies(true)
   .setAutoCollectConsole(true)
   .setUseDiskRetryCaching(true)
-  .start();
+
+appInsights.defaultClient.context.tags[appInsights.defaultClient.context.keys.cloudRole] = "flights-api";
+appInsights.start();
 
 const apiRouter = require('./routes/api');
 

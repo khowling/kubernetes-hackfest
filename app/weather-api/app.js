@@ -16,15 +16,16 @@ if (process.env.NODE_ENV != 'container') {
 
 const appInsights = require('applicationinsights')
 appInsights.setup()
-    .setAutoDependencyCorrelation(true)
-    .setAutoCollectRequests(true)
-    .setAutoCollectPerformance(true)
-    .setAutoCollectExceptions(true)
-    .setAutoCollectDependencies(true)
-    .setAutoCollectConsole(true)
-    .setUseDiskRetryCaching(true)
-    .start()
+  .setAutoDependencyCorrelation(true)
+  .setAutoCollectRequests(true)
+  .setAutoCollectPerformance(true)
+  .setAutoCollectExceptions(true)
+  .setAutoCollectDependencies(true)
+  .setAutoCollectConsole(true)
+  .setUseDiskRetryCaching(true)
 
+appInsights.defaultClient.context.tags[appInsights.defaultClient.context.keys.cloudRole] = "weather-api";
+appInsights.start();
 var apiRouter = require('./routes/api')
 
 var app = express()

@@ -19,7 +19,7 @@
     "popper.js": "^1.14.3",
     "request-promise": "^4.2.2",
     "vue": "^2.6.6",
-    "vue-application-insights": "^1.0.3",
+    "vue-application-insights": "^1.0.6",
     "vue-clickaway": "^2.1.0",
     "vue-notifyjs": "^0.4.3",
     "vue-router": "^3.0.1",
