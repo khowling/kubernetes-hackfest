@@ -11,7 +11,7 @@ resources:
 variables:
   # Container registry service connection established during pipeline creation
   dockerRegistryServiceConnection: 'c82e43b2-56df-40bc-b2bb-c6b3cb3993f9'
-  imageRepository: 'khhackfestdataapi'
+  imageRepository: 'hackfest/data-api'
   containerRegistry: 'khcommon.azurecr.io'
   dockerfilePath: '$(Build.SourcesDirectory)/app/data-api/Dockerfile'
   tag: '$(Build.BuildId)'
