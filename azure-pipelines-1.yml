@@ -11,7 +11,7 @@ resources:
 variables:
   # Container registry service connection established during pipeline creation
   dockerRegistryServiceConnection: 'c82e43b2-56df-40bc-b2bb-c6b3cb3993f9'
-  imageRepository: 'khhackfestdataapi'
+  imageRepository: 'hackfest/data-api'
   containerRegistry: 'khcommon.azurecr.io'
   dockerfilePath: '$(Build.SourcesDirectory)/app/data-api/Dockerfile'
   tag: '$(Build.BuildId)'
@@ -37,3 +37,15 @@ stages:
         containerRegistry: $(dockerRegistryServiceConnection)
         tags: |
           $(tag)
+    - task: HelmDeploy@0
+      inputs:
+        connectionType: Kubernetes Service Connection
+        kubernetesServiceEndpoint: Cloud-Lab-Workshop-kh-workshop-cluster-hackfest-1580478179331
+        namespace: 'hackfest'
+        command: 'upgrade'
+        chartType: 'FilePath'
+        chartPath: '$(Build.SourcesDirectory)/charts/data-api'
+        releaseName: 'data-api'
+        overrideValues: 'deploy.acrServer=$(containerRegistry),deploy.imageTag=$(tag)'
+        valueFile: '$(Build.SourcesDirectory)/charts/data-api/values.yaml'
+
