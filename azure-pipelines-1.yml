@@ -9,13 +9,16 @@ resources:
 - repo: self
 
 variables:
+- group: Cloud-Lab-cosmos-db-secret
   # Container registry service connection established during pipeline creation
-  dockerRegistryServiceConnection: 'c82e43b2-56df-40bc-b2bb-c6b3cb3993f9'
-  containerRegistry: 'khcommon.azurecr.io'
-  tag: '$(Build.BuildId)'
-  
-  # Agent VM image name
-  vmImageName: 'ubuntu-latest'
+- name: 'dockerRegistryServiceConnection'
+  value: 'c82e43b2-56df-40bc-b2bb-c6b3cb3993f9'
+- name: 'containerRegistry'
+  value: 'khcommon.azurecr.io'
+- name: 'tag'
+  value: '$(Build.BuildId)'
+- name: namespace
+  value: 'hackfest'
 
 stages:
 - stage: Build
@@ -71,65 +74,83 @@ stages:
         containerRegistry: $(dockerRegistryServiceConnection)
         tags: |
           $(tag)
-    - task: HelmDeploy@0
-      displayName: Helm upgrade data-api
-      inputs:
-        connectionType: Kubernetes Service Connection
-        kubernetesServiceEndpoint: Cloud-Lab-Workshop-kh-workshop-cluster-hackfest-1580478179331
-        namespace: 'hackfest'
-        command: 'upgrade'
-        chartType: 'FilePath'
-        chartPath: '$(Build.SourcesDirectory)/charts/data-api'
-        releaseName: 'data-api'
-        overrideValues: 'deploy.acrServer=$(containerRegistry),deploy.imageTag=$(tag)'
-        valueFile: '$(Build.SourcesDirectory)/charts/data-api/values.yaml'
-    - task: HelmDeploy@0
-      displayName: Helm upgrade data-api
-      inputs:
-        connectionType: Kubernetes Service Connection
-        kubernetesServiceEndpoint: Cloud-Lab-Workshop-kh-workshop-cluster-hackfest-1580478179331
-        namespace: 'hackfest'
-        command: 'upgrade'
-        chartType: 'FilePath'
-        chartPath: '$(Build.SourcesDirectory)/charts/quakes-api'
-        releaseName: 'quakes-api'
-        overrideValues: 'deploy.acrServer=$(containerRegistry),deploy.imageTag=$(tag)'
-        valueFile: '$(Build.SourcesDirectory)/charts/quakes-api/values.yaml'
-    - task: HelmDeploy@0
-      displayName: Helm upgrade weather-api
-      inputs:
-        connectionType: Kubernetes Service Connection
-        kubernetesServiceEndpoint: Cloud-Lab-Workshop-kh-workshop-cluster-hackfest-1580478179331
-        namespace: 'hackfest'
-        command: 'upgrade'
-        chartType: 'FilePath'
-        chartPath: '$(Build.SourcesDirectory)/charts/weather-api'
-        releaseName: 'weather-api'
-        overrideValues: 'deploy.acrServer=$(containerRegistry),deploy.imageTag=$(tag)'
-        valueFile: '$(Build.SourcesDirectory)/charts/weather-api/values.yaml'
-    - task: HelmDeploy@0
-      displayName: Helm upgrade flights-api
-      inputs:
-        connectionType: Kubernetes Service Connection
-        kubernetesServiceEndpoint: Cloud-Lab-Workshop-kh-workshop-cluster-hackfest-1580478179331
-        namespace: 'hackfest'
-        command: 'upgrade'
-        chartType: 'FilePath'
-        chartPath: '$(Build.SourcesDirectory)/charts/flights-api'
-        releaseName: 'flights-api'
-        overrideValues: 'deploy.acrServer=$(containerRegistry),deploy.imageTag=$(tag)'
-        valueFile: '$(Build.SourcesDirectory)/charts/flights-api/values.yaml'
-    - task: HelmDeploy@0
-      displayName: Helm upgrade service-tracker-ui
-      inputs:
-        connectionType: Kubernetes Service Connection
-        kubernetesServiceEndpoint: Cloud-Lab-Workshop-kh-workshop-cluster-hackfest-1580478179331
-        namespace: 'hackfest'
-        command: 'upgrade'
-        chartType: 'FilePath'
-        chartPath: '$(Build.SourcesDirectory)/charts/service-tracker-ui'
-        releaseName: 'service-tracker-ui'
-        overrideValues: 'deploy.acrServer=$(containerRegistry),deploy.imageTag=$(tag)'
-        valueFile: '$(Build.SourcesDirectory)/charts/service-tracker-ui/values.yaml'
+  - deployment: Deploy
+    dependsOn: Build
+    displayName: Deploy to Cloud-Lab-Workshop
+    environment: Cloud-Lab-Workshop
+    pool:
+      name: 'home'
+    strategy:
+      runOnce:
+        deploy:
+          steps:
+            - task: KubernetesManifest@0
+              displayName: Create secret for MongoDB
+              inputs:
+                action: createSecret
+                secretName: cosmos-db-secret
+                secretType: generic
+                namespace: $(k8sNamespace)
+                secretArguments: --from-literal=user=$(cosmos-db-secret-user) --from-literal=pwd=$(cosmos-db-secret-pwd) --from-literal=appinsights=$(cosmos-db-secret-aikey)
+            - task: HelmDeploy@0
+              displayName: Helm upgrade data-api
+              inputs:
+                connectionType: Kubernetes Service Connection
+                kubernetesServiceEndpoint: Cloud-Lab-Workshop-kh-workshop-cluster-hackfest-1580478179331
+                namespace: $(namespace)
+                command: 'upgrade'
+                chartType: 'FilePath'
+                chartPath: '$(Build.SourcesDirectory)/charts/data-api'
+                releaseName: 'data-api'
+                overrideValues: 'deploy.acrServer=$(containerRegistry),deploy.imageTag=$(tag)'
+                valueFile: '$(Build.SourcesDirectory)/charts/data-api/values.yaml'
+            - task: HelmDeploy@0
+              displayName: Helm upgrade data-api
+              inputs:
+                connectionType: Kubernetes Service Connection
+                kubernetesServiceEndpoint: Cloud-Lab-Workshop-kh-workshop-cluster-hackfest-1580478179331
+                namespace: $(namespace)
+                command: 'upgrade'
+                chartType: 'FilePath'
+                chartPath: '$(Build.SourcesDirectory)/charts/quakes-api'
+                releaseName: 'quakes-api'
+                overrideValues: 'deploy.acrServer=$(containerRegistry),deploy.imageTag=$(tag)'
+                valueFile: '$(Build.SourcesDirectory)/charts/quakes-api/values.yaml'
+            - task: HelmDeploy@0
+              displayName: Helm upgrade weather-api
+              inputs:
+                connectionType: Kubernetes Service Connection
+                kubernetesServiceEndpoint: Cloud-Lab-Workshop-kh-workshop-cluster-hackfest-1580478179331
+                namespace: $(namespace)
+                command: 'upgrade'
+                chartType: 'FilePath'
+                chartPath: '$(Build.SourcesDirectory)/charts/weather-api'
+                releaseName: 'weather-api'
+                overrideValues: 'deploy.acrServer=$(containerRegistry),deploy.imageTag=$(tag)'
+                valueFile: '$(Build.SourcesDirectory)/charts/weather-api/values.yaml'
+            - task: HelmDeploy@0
+              displayName: Helm upgrade flights-api
+              inputs:
+                connectionType: Kubernetes Service Connection
+                kubernetesServiceEndpoint: Cloud-Lab-Workshop-kh-workshop-cluster-hackfest-1580478179331
+                namespace: $(namespace)
+                command: 'upgrade'
+                chartType: 'FilePath'
+                chartPath: '$(Build.SourcesDirectory)/charts/flights-api'
+                releaseName: 'flights-api'
+                overrideValues: 'deploy.acrServer=$(containerRegistry),deploy.imageTag=$(tag)'
+                valueFile: '$(Build.SourcesDirectory)/charts/flights-api/values.yaml'
+            - task: HelmDeploy@0
+              displayName: Helm upgrade service-tracker-ui
+              inputs:
+                connectionType: Kubernetes Service Connection
+                kubernetesServiceEndpoint: Cloud-Lab-Workshop-kh-workshop-cluster-hackfest-1580478179331
+                namespace: 'hackfest'
+                command: 'upgrade'
+                chartType: 'FilePath'
+                chartPath: '$(Build.SourcesDirectory)/charts/service-tracker-ui'
+                releaseName: 'service-tracker-ui'
+                overrideValues: 'deploy.acrServer=$(containerRegistry),deploy.imageTag=$(tag)'
+                valueFile: '$(Build.SourcesDirectory)/charts/service-tracker-ui/values.yaml'
 
 
