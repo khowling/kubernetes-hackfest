@@ -119,17 +119,26 @@ stages:
         releaseName: 'flights-api'
         overrideValues: 'deploy.acrServer=$(containerRegistry),deploy.imageTag=$(tag)'
         valueFile: '$(Build.SourcesDirectory)/charts/flights-api/values.yaml'
-    - task: HelmDeploy@0
-      displayName: Helm upgrade service-tracker-ui
-      inputs:
-        connectionType: Kubernetes Service Connection
-        kubernetesServiceEndpoint: Cloud-Lab-Workshop-kh-workshop-cluster-hackfest-1580478179331
-        namespace: 'hackfest'
-        command: 'upgrade'
-        chartType: 'FilePath'
-        chartPath: '$(Build.SourcesDirectory)/charts/service-tracker-ui'
-        releaseName: 'service-tracker-ui'
-        overrideValues: 'deploy.acrServer=$(containerRegistry),deploy.imageTag=$(tag)'
-        valueFile: '$(Build.SourcesDirectory)/charts/service-tracker-ui/values.yaml'
+  - deployment: Deploy
+    displayName: Deploy to Cloud-Lab-Workshop
+    environment: Cloud-Lab-Workshop
+    pool:
+      name: 'home'
+    strategy:
+      runOnce:
+        deploy:
+          steps:
+            - task: HelmDeploy@0
+              displayName: Helm upgrade service-tracker-ui
+              inputs:
+                connectionType: Kubernetes Service Connection
+                kubernetesServiceEndpoint: Cloud-Lab-Workshop-kh-workshop-cluster-hackfest-1580478179331
+                namespace: 'hackfest'
+                command: 'upgrade'
+                chartType: 'FilePath'
+                chartPath: '$(Build.SourcesDirectory)/charts/service-tracker-ui'
+                releaseName: 'service-tracker-ui'
+                overrideValues: 'deploy.acrServer=$(containerRegistry),deploy.imageTag=$(tag)'
+                valueFile: '$(Build.SourcesDirectory)/charts/service-tracker-ui/values.yaml'
 
 
