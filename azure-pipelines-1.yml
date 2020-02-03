@@ -88,9 +88,10 @@ stages:
               displayName: Create secret for MongoDB
               inputs:
                 action: createSecret
+                kubernetesServiceConnection: Cloud-Lab-Workshop-kh-workshop-cluster-hackfest-1580478179331
                 secretName: cosmos-db-secret
                 secretType: generic
-                namespace: $(k8sNamespace)
+                namespace: $(namespace)
                 secretArguments: --from-literal=user=$(cosmos-db-secret-user) --from-literal=pwd=$(cosmos-db-secret-pwd) --from-literal=appinsights=$(cosmos-db-secret-aikey)
             - task: HelmDeploy@0
               displayName: Helm upgrade data-api
