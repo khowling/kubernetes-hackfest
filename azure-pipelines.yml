@@ -1,32 +1,160 @@
-# Docker image
-# Build a Docker image to run, deploy, or push to a container registry.
-# Add steps that use Docker Compose, tag images, push to a registry, run an image, and more:
-# https://docs.microsoft.com/vsts/pipelines/languages/docker
+# Docker
+# Build and push an image to Azure Container Registry
+# https://docs.microsoft.com/azure/devops/pipelines/languages/docker
 
-pool:
-  vmImage: 'Ubuntu 16.04'
+trigger:
+- master
+
+resources:
+- repo: self
 
 variables:
-  imageNameS: 'service-tracker-ui:latest'
-  imageNameQ: 'quakes-api:latest'
-  imageNameW: 'weather-api:latest'
-  imageNameD: 'data-api:latest'
-  imageNameF: 'flights-api:latest'
+- group: Cloud-Lab-cosmos-db-secret
+  # Container registry service connection established during pipeline creation
+- name: 'dockerRegistryServiceConnection'
+  value: 'c82e43b2-56df-40bc-b2bb-c6b3cb3993f9'
+- name: 'containerRegistry'
+  value: 'khcommon.azurecr.io'
+- name: 'tag'
+  value: '$(Build.BuildId)'
+- name: namespace
+  value: 'hackfest-dev'
+- name: dev-env
+  value: 'aks-workshop (cloud dev)-kh-workshop-cluster-hackfest-dev-1581596013501'
 
-steps:
-- script: |
-    docker build -f app/service-tracker-ui/Dockerfile -t azcloudnative/$(imageNameS) app/service-tracker-ui
-    docker build -f app/quakes-api/Dockerfile -t azcloudnative/$(imageNameQ) app/quakes-api
-    docker build -f app/weather-api/Dockerfile -t azcloudnative/$(imageNameW) app/weather-api
-    docker build -f app/data-api/Dockerfile -t azcloudnative/$(imageNameD) app/data-api
-    docker build -f app/flights-api/Dockerfile -t azcloudnative/$(imageNameF) app/flights-api
+stages:
+- stage: Build
+  displayName: Build and push stage
+  jobs:  
+  - job: Build
+    displayName: Build
+    pool:
+      name: 'home'
+    steps:
+    - task: Docker@2
+      displayName: Build data-api
+      inputs:
+        command: buildAndPush
+        repository: 'hackfest/data-api'
+        dockerfile: '$(Build.SourcesDirectory)/app/data-api/Dockerfile'
+        containerRegistry: $(dockerRegistryServiceConnection)
+        tags: |
+          $(tag)
+    - task: Docker@2
+      displayName: Build flights-api
+      inputs:
+        command: buildAndPush
+        repository: 'hackfest/flights-api'
+        dockerfile: '$(Build.SourcesDirectory)/app/flights-api/Dockerfile'
+        containerRegistry: $(dockerRegistryServiceConnection)
+        tags: |
+          $(tag)
+    - task: Docker@2
+      displayName: Build quakes-api
+      inputs:
+        command: buildAndPush
+        repository: 'hackfest/quakes-api'
+        dockerfile: '$(Build.SourcesDirectory)/app/quakes-api/Dockerfile'
+        containerRegistry: $(dockerRegistryServiceConnection)
+        tags: |
+          $(tag)
+    - task: Docker@2
+      displayName: Build weather-api
+      inputs:
+        command: buildAndPush
+        repository: 'hackfest/weather-api'
+        dockerfile: '$(Build.SourcesDirectory)/app/weather-api/Dockerfile'
+        containerRegistry: $(dockerRegistryServiceConnection)
+        tags: |
+          $(tag)
+    - task: Docker@2
+      displayName: Build service-tracker-ui
+      inputs:
+        command: buildAndPush
+        repository: 'hackfest/service-tracker-ui'
+        dockerfile: '$(Build.SourcesDirectory)/app/service-tracker-ui/Dockerfile'
+        containerRegistry: $(dockerRegistryServiceConnection)
+        tags: |
+          $(tag)
+  - deployment: Deploy
+    dependsOn: Build
+    displayName: Deploy to Cloud-Lab-Workshop
+    environment: Cloud-Lab-Workshop
+    pool:
+      name: 'home'
+    strategy:
+      runOnce:
+        deploy:
+          steps:
+            - task: KubernetesManifest@0
+              displayName: Create secret for MongoDB
+              inputs:
+                action: createSecret
+                kubernetesServiceConnection: $(dev-env)
+                secretName: cosmos-db-secret
+                secretType: generic
+                namespace: $(namespace)
+                secretArguments: --from-literal=user=$(cosmos-db-secret-user) --from-literal=pwd=$(cosmos-db-secret-pwd) --from-literal=appinsights=$(cosmos-db-secret-aikey)
+            - task: HelmDeploy@0
+              displayName: Helm upgrade data-api
+              inputs:
+                connectionType: Kubernetes Service Connection
+                kubernetesServiceEndpoint: $(dev-env)
+                namespace: $(namespace)
+                command: 'upgrade'
+                chartType: 'FilePath'
+                chartPath: '$(Build.SourcesDirectory)/charts/data-api'
+                releaseName: 'data-api'
+                overrideValues: 'deploy.acrServer=$(containerRegistry),deploy.imageTag=$(tag)'
+                valueFile: '$(Build.SourcesDirectory)/charts/data-api/values.yaml'
+            - task: HelmDeploy@0
+              displayName: Helm upgrade data-api
+              inputs:
+                connectionType: Kubernetes Service Connection
+                kubernetesServiceEndpoint: $(dev-env)
+                namespace: $(namespace)
+                command: 'upgrade'
+                chartType: 'FilePath'
+                chartPath: '$(Build.SourcesDirectory)/charts/quakes-api'
+                releaseName: 'quakes-api'
+                overrideValues: 'deploy.acrServer=$(containerRegistry),deploy.imageTag=$(tag)'
+                valueFile: '$(Build.SourcesDirectory)/charts/quakes-api/values.yaml'
+            - task: HelmDeploy@0
+              displayName: Helm upgrade weather-api
+              inputs:
+                connectionType: Kubernetes Service Connection
+                kubernetesServiceEndpoint: $(dev-env)
+                namespace: $(namespace)
+                command: 'upgrade'
+                chartType: 'FilePath'
+                chartPath: '$(Build.SourcesDirectory)/charts/weather-api'
+                releaseName: 'weather-api'
+                overrideValues: 'deploy.acrServer=$(containerRegistry),deploy.imageTag=$(tag)'
+                valueFile: '$(Build.SourcesDirectory)/charts/weather-api/values.yaml'
+            - task: HelmDeploy@0
+              displayName: Helm upgrade flights-api
+              inputs:
+                connectionType: Kubernetes Service Connection
+                kubernetesServiceEndpoint: $(dev-env)
+                namespace: $(namespace)
+                command: 'upgrade'
+                chartType: 'FilePath'
+                chartPath: '$(Build.SourcesDirectory)/charts/flights-api'
+                releaseName: 'flights-api'
+                overrideValues: 'deploy.acrServer=$(containerRegistry),deploy.imageTag=$(tag)'
+                valueFile: '$(Build.SourcesDirectory)/charts/flights-api/values.yaml'
+            - task: HelmDeploy@0
+              displayName: Helm upgrade service-tracker-ui
+              inputs:
+                connectionType: Kubernetes Service Connection
+                kubernetesServiceEndpoint: $(dev-env)
+                namespace: $(namespace)
+                command: 'upgrade'
+                chartType: 'FilePath'
+                chartPath: '$(Build.SourcesDirectory)/charts/service-tracker-ui'
+                releaseName: 'service-tracker-ui'
+                overrideValues: 'deploy.acrServer=$(containerRegistry),deploy.imageTag=$(tag)'
+                valueFile: '$(Build.SourcesDirectory)/charts/service-tracker-ui/values.yaml'
 
-- script: docker login -u $(dockerUser) -p $(dockerPass)
-  displayName: 'Docker Login'
-  
-- script: |
-    docker push azcloudnative/$(imageNameS)
-    docker push azcloudnative/$(imageNameW)
-    docker push azcloudnative/$(imageNameD)
-    docker push azcloudnative/$(imageNameF)
-    docker push azcloudnative/$(imageNameQ)
+
+
