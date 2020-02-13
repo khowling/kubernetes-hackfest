@@ -148,7 +148,7 @@ stages:
               inputs:
                 connectionType: Kubernetes Service Connection
                 kubernetesServiceEndpoint: $(dev-env)
-                namespace: 'hackfest'
+                namespace: $(namespace)
                 command: 'upgrade'
                 chartType: 'FilePath'
                 chartPath: '$(Build.SourcesDirectory)/charts/service-tracker-ui'
