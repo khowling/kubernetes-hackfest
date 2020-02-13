@@ -18,7 +18,7 @@ variables:
 - name: 'tag'
   value: '$(Build.BuildId)'
 - name: namespace
-  value: 'hackfest'
+  value: 'hackfest1'
 
 stages:
 - stage: Build
@@ -88,7 +88,7 @@ stages:
               displayName: Create secret for MongoDB
               inputs:
                 action: createSecret
-                kubernetesServiceConnection: Cloud-Lab-Workshop-kh-workshop-cluster-hackfest-1580478179331
+                kubernetesServiceConnection: cloud-aks-workshop-dev-kh-workshop-cluster-hackfest-1581592169734
                 secretName: cosmos-db-secret
                 secretType: generic
                 namespace: $(namespace)
@@ -97,7 +97,7 @@ stages:
               displayName: Helm upgrade data-api
               inputs:
                 connectionType: Kubernetes Service Connection
-                kubernetesServiceEndpoint: Cloud-Lab-Workshop-kh-workshop-cluster-hackfest-1580478179331
+                kubernetesServiceEndpoint: cloud-aks-workshop-dev-kh-workshop-cluster-hackfest-1581592169734
                 namespace: $(namespace)
                 command: 'upgrade'
                 chartType: 'FilePath'
@@ -109,7 +109,7 @@ stages:
               displayName: Helm upgrade data-api
               inputs:
                 connectionType: Kubernetes Service Connection
-                kubernetesServiceEndpoint: Cloud-Lab-Workshop-kh-workshop-cluster-hackfest-1580478179331
+                kubernetesServiceEndpoint: cloud-aks-workshop-dev-kh-workshop-cluster-hackfest-1581592169734
                 namespace: $(namespace)
                 command: 'upgrade'
                 chartType: 'FilePath'
@@ -121,7 +121,7 @@ stages:
               displayName: Helm upgrade weather-api
               inputs:
                 connectionType: Kubernetes Service Connection
-                kubernetesServiceEndpoint: Cloud-Lab-Workshop-kh-workshop-cluster-hackfest-1580478179331
+                kubernetesServiceEndpoint: cloud-aks-workshop-dev-kh-workshop-cluster-hackfest-1581592169734
                 namespace: $(namespace)
                 command: 'upgrade'
                 chartType: 'FilePath'
@@ -133,7 +133,7 @@ stages:
               displayName: Helm upgrade flights-api
               inputs:
                 connectionType: Kubernetes Service Connection
-                kubernetesServiceEndpoint: Cloud-Lab-Workshop-kh-workshop-cluster-hackfest-1580478179331
+                kubernetesServiceEndpoint: cloud-aks-workshop-dev-kh-workshop-cluster-hackfest-1581592169734
                 namespace: $(namespace)
                 command: 'upgrade'
                 chartType: 'FilePath'
@@ -145,7 +145,7 @@ stages:
               displayName: Helm upgrade service-tracker-ui
               inputs:
                 connectionType: Kubernetes Service Connection
-                kubernetesServiceEndpoint: Cloud-Lab-Workshop-kh-workshop-cluster-hackfest-1580478179331
+                kubernetesServiceEndpoint: cloud-aks-workshop-dev-kh-workshop-cluster-hackfest-1581592169734
                 namespace: 'hackfest'
                 command: 'upgrade'
                 chartType: 'FilePath'
