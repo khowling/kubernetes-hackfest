@@ -18,9 +18,9 @@ variables:
 - name: 'tag'
   value: '$(Build.BuildId)'
 - name: namespace
-  value: 'hackfest-dev'
+  value: 'hackfest'
 - name: dev-env
-  value: 'kh-aksworkshop-kh-workshop-cluster-hackfest-dev-1583410665516'
+  value: 'cloud-workshop-dev-kh-workshop-cluster-hackfest-1583412481107'
 
 stages:
 - stage: Build
