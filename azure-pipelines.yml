@@ -12,7 +12,7 @@ variables:
 - group: Cloud-Lab-cosmos-db-secret
   # Container registry service connection established during pipeline creation
 - name: 'dockerRegistryServiceConnection'
-  value: 'c82e43b2-56df-40bc-b2bb-c6b3cb3993f9'
+  value: 'khcommon'
 - name: 'containerRegistry'
   value: 'khcommon.azurecr.io'
 - name: 'tag'
