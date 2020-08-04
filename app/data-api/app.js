@@ -47,7 +47,7 @@ var mongoPrefix = "mongodb://"
 var user = process.env.MONGODB_USER
 var password = process.env.MONGODB_PASSWORD
 
-var cosmosConnectString = mongoPrefix.concat(user,`:`,password,`@`,user,`.documents.azure.com:10255/hackfest?ssl=true`)
+var cosmosConnectString = mongoPrefix.concat(user, `:`, password, `@`, user, `.mongo.cosmos.azure.com:10255/hackfest?ssl=true`)
 
 if (process.env.NODE_ENV != 'local') {
   mongoose.connect(
@@ -84,11 +84,11 @@ app.use(logger('dev'));
 app.use(bodyParser.json({ limit: '2mb' }));
 app.use('/', apiRouter);
 
-app.use(function(req, res, next) {
+app.use(function (req, res, next) {
   next(createError(404));
 });
 
-app.use(function(req, res, next) {
+app.use(function (req, res, next) {
   if (req.method === 'GET' || req.method === 'POST') {
     appInsights.defaultClient.trackNodeHttpRequest({
       request: req,
@@ -112,7 +112,7 @@ app.use(function(req, res, next) {
 });
 
 // error handler
-app.use(function(err, req, res, next) {
+app.use(function (err, req, res, next) {
   // set locals, only providing error in development
   res.locals.message = err.message;
   res.locals.error = req.app.get('env') === 'development' ? err : {};
