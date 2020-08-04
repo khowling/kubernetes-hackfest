@@ -31,6 +31,7 @@ appInsights.start();
 
 mongoose.set('useCreateIndex', true);
 mongoose.set('useFindAndModify', false);
+mongoose.set('debug', true)
 
 require('./models/mongo/flights');
 require('./models/mongo/latestFlight');

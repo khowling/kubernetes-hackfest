@@ -3,7 +3,7 @@ const mongoose = require('mongoose');
 var Schema = mongoose.Schema;
 
 var latestSchema = new Schema({
-  Timestamp: String,
+  Timestamp: { type: String, unique: true },
   Created: { type: Date, default: Date.now }
 });
 
