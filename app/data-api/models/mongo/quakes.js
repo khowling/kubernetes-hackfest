@@ -3,7 +3,7 @@ const mongoose = require('mongoose');
 var Schema = mongoose.Schema;
 
 var quakeSchema = new Schema({
-  Timestamp: String,
+  Timestamp: { type: String, unique: true },
   FeatureCollection: mongoose.Schema.Types.Mixed
 });
 
