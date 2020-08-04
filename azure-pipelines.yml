@@ -20,7 +20,7 @@ variables:
 - name: namespace
   value: 'hackfest'
 - name: dev-env
-  value: 'kh-workshop-cluster'
+  value: 'kh-hackfest-dev'
 
 stages:
 - stage: Build
