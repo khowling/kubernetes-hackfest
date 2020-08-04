@@ -78,8 +78,8 @@ stages:
           $(tag)
   - deployment: Deploy
     dependsOn: Build
-    displayName: Deploy to Cloud-Lab-Workshop
-    environment: Cloud-Lab-Workshop
+    displayName: Deploy to kh-hackfest-dev
+    environment: kh-hackfest-dev
     pool:
       name: 'home'
     strategy:
