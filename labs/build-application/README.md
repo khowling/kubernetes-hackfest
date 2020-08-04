@@ -68,7 +68,7 @@ In this lab we will build Docker containers for each of the application componen
     # Create a unique application insights name
     APPINSIGHTSNAME=appInsightshackfest$UNIQUE_SUFFIX
     # Deploy the appinsights ARM template   
-    az group deployment create --resource-group $RGNAME --template-file labs/build-application/app-Insights.json --parameters type=Node.js name=$APPINSIGHTSNAME regionId=eastus
+    az deployment group create --resource-group $RGNAME --template-file labs/build-application/app-Insights.json --parameters type=Node.js name=$APPINSIGHTSNAME regionId=eastus --no-wait
     ```
 
     Alternatively :    
@@ -113,7 +113,7 @@ In this lab we will build Docker containers for each of the application componen
     ```
 
     ```bash
-    export MONGODB_PASSWORD=$(az cosmosdb list-keys --name $COSMOSNAME --resource-group $RGNAME --query "primaryMasterKey" -o tsv)
+    export MONGODB_PASSWORD=$(az cosmosdb keys list --name $COSMOSNAME --resource-group $RGNAME --query "primaryMasterKey" -o tsv)
     ```
 
     Use Instrumentation Key from step 3 above.
@@ -130,11 +130,11 @@ In this lab we will build Docker containers for each of the application componen
     In this step we will create a Docker container image for each of our microservices. We will use ACR Builder functionality to build and store these images in the cloud. 
 
     ```bash
-    az acr build -t hackfest/data-api:1.0 -r $ACRNAME --no-logs app/data-api
-    az acr build -t hackfest/flights-api:1.0 -r $ACRNAME --no-logs app/flights-api
-    az acr build -t hackfest/quakes-api:1.0 -r $ACRNAME --no-logs app/quakes-api
-    az acr build -t hackfest/weather-api:1.0 -r $ACRNAME --no-logs app/weather-api
-    az acr build -t hackfest/service-tracker-ui:1.0 -r $ACRNAME --no-logs app/service-tracker-ui
+    az acr build -t hackfest/data-api:1.0 -r $ACRNAME --no-logs -o json app/data-api
+    az acr build -t hackfest/flights-api:1.0 -r $ACRNAME --no-logs -o json app/flights-api
+    az acr build -t hackfest/quakes-api:1.0 -r $ACRNAME --no-logs -o json app/quakes-api
+    az acr build -t hackfest/weather-api:1.0 -r $ACRNAME --no-logs -o json app/weather-api
+    az acr build -t hackfest/service-tracker-ui:1.0 -r $ACRNAME --no-logs -o json app/service-tracker-ui
     ```
 
     You can see the status of the builds by running the command below.
@@ -142,7 +142,7 @@ In this lab we will build Docker containers for each of the application componen
     ```bash
     az acr task list-runs -r $ACRNAME -o table
 
-    az acr task logs -r $ACRNAME --run-id aa1
+    az acr task logs -r $ACRNAME --run-id <run id>
     ```
 
     Browse to your ACR instance in the Azure portal and validate that the images are in "Repositories."

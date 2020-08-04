@@ -18,10 +18,10 @@ spec:
           resources:
             requests:
               memory: "512Mi"
-              cpu: "100m"
+              cpu: "200m"
             limits:
               memory: "1024Mi"
-              cpu: "500m"
+              cpu: "1.0"
           env:
             - name: FLIGHT_API_ROOT
               value: http://flights-api.hackfest.svc.cluster.local:3003/
