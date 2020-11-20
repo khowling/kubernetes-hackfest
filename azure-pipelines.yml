@@ -28,8 +28,8 @@ stages:
   jobs:  
   - job: Build
     displayName: Build
-    pool:
-      name: 'Azure Pipelines'
+#    pool:
+#      name: 'Azure Pipelines'
     steps:
     - task: Docker@2
       displayName: Build data-api
@@ -80,8 +80,8 @@ stages:
     dependsOn: Build
     displayName: Deploy to kh-hackfest-dev
     environment: kh-hackfest-dev
-    pool:
-      name: 'Azure Pipelines'
+#    pool:
+#      name: 'Azure Pipelines'
     strategy:
       runOnce:
         deploy:
